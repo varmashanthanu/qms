@@ -1,6 +1,8 @@
 # 🏦 Queue Management System (QMS)
 
-A secure, scalable, and modular queue management system built with **Django**, **Django REST Framework**, **PostgreSQL**, and **Docker**. Designed for use in **bank branches** with support for **multi-role access**, real-time ticket updates, and dashboard APIs.
+A secure, scalable, and modular queue management system built with **Django**, **Django REST Framework**, **PostgreSQL
+**, and **Docker**. Designed for use in **bank branches** with support for **multi-role access**, real-time ticket
+updates, and dashboard APIs.
 
 ---
 
@@ -57,6 +59,7 @@ cd qms
 ```
 
 ### 2. Create the .env File
+
 Create an `.env-dev` file in the project root with the following content:
 
 ```env-dev
@@ -87,20 +90,22 @@ Access the admin interface at `http://localhost:8000/admin` with the superuser c
 Health check the API at `http://localhost:8000/api/v1/health`.
 
 ## 📡 API Endpoints
+
 Access the API documentation at `http://localhost:8000/api/v1/docs` (Swagger UI).
 
-| Method | Endpoint                       | Description                     | Auth Required |
-|--------|--------------------------------|----------------------------------|---------------|
-| POST   | /api/v1/auth/login/            | Obtain JWT access & refresh     | ❌ No         |
-| POST   | /api/v1/auth/refresh/          | Refresh JWT token               | ✅ Yes        |
-| POST   | /api/v1/auth/create-staff/     | Admin-only: create staff user   | ✅ Yes (admin)|
-| GET    | /api/v1/auth/health/           | Healthcheck                     | ❌ No         |
-
+| Method | Endpoint                   | Description                   | Auth Required |
+|--------|----------------------------|-------------------------------|---------------|
+| POST   | /api/v1/auth/login/        | Obtain JWT access & refresh   | ❌ No          |
+| POST   | /api/v1/auth/refresh/      | Refresh JWT token             | ✅ Yes         |
+| POST   | /api/v1/auth/create-staff/ | Admin-only: create staff user | ✅ Yes (admin) |
+| GET    | /api/v1/auth/health/       | Healthcheck                   | ❌ No          |
 
 ## 🔒 License
+
 © 2025 Shanthanu Varma. All rights reserved.
 Unauthorized use, distribution, or modification of this code is prohibited.
 
 ## 📬 Contact
+
 For questions, licensing, or deployment support:
 📧 varma [DOT] shanthanu [ AT ] gmail.com
