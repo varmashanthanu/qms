@@ -103,4 +103,4 @@ Unauthorized use, distribution, or modification of this code is prohibited.
 
 ## 📬 Contact
 For questions, licensing, or deployment support:
-📧 varma.shanthanu [ AT ]gmail.com
+📧 varma [DOT] shanthanu [ AT ] gmail.com
