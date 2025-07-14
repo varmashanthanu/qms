@@ -5,67 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Service, Category, Branch, ServiceCounter, Ticket
-from .serializers import (ServiceSerializer, CategorySerializer, BranchSerializer, ServiceCounterSerializer,
-                          TicketSerializer, TicketCreateSerializer)
-from users.permissions import IsAdmin, IsStaff
-
-# TODO change all the hardcoded strings to constants or enums (Status, actions, etc.)
-
-# --- Service Views ---
-class ServiceListCreateView(generics.ListCreateAPIView):
-    queryset = Service.objects.all().order_by('-created_at')
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAdmin]
-
-class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Category Views ---
-class CategoryListCreateView(generics.ListCreateAPIView):
-    queryset = Category.objects.all().order_by('name')
-    serializer_class = CategorySerializer
-    permission_classes = [IsAdmin]
-
-class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Branch Views ---
-class BranchListCreateView(generics.ListCreateAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
-class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- ServiceCounter Views ---
-class ServiceCounterListCreateView(generics.ListCreateAPIView):
-    queryset = ServiceCounter.objects.all()
-    serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
-
-class ServiceCounterDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ServiceCounter.objects.all()
-    serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Ticket Views ---
-class TicketCreateView(generics.CreateAPIView):
-    queryset = Ticket.objects.all()
-    serializer_class = TicketCreateSerializer
-    permission_classes = []  # Public (no auth) — secure behind device-level controls
-
+from services.models import Service, Branch, ServiceCounter, Ticket
+from services.serializers import TicketSerializer
+from users.permissions import IsStaff
 
 # --- Staff Ticket Views ---
 class MyTicketsView(generics.ListAPIView):
