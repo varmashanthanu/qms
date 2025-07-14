@@ -100,6 +100,12 @@ Access the API documentation at `http://localhost:8000/api/v1/docs` (Swagger UI)
 | POST   | /api/v1/auth/create-staff/ | Admin-only: create staff user | ✅ Yes (admin) |
 | GET    | /api/v1/auth/health/       | Healthcheck                   | ❌ No          |
 
+
+## 📝 Future Work
+- [ ] Celery integration for background tasks (re-assignment etc.)
+- [ ] Auditing & logging for ticket operations
+- [ ] Staff notifications for ticket updates
+
 ## 🔒 License
 
 © 2025 Shanthanu Varma. All rights reserved.
