@@ -131,3 +131,50 @@ class TicketActionView(APIView):
             return Response({"error": "Invalid action."}, status=400)
 
         return Response(TicketSerializer(ticket).data, status=200)
+
+class CounterQueueView(APIView):
+    permission_classes = [IsAuthenticated, IsStaff]
+
+    def get(self, request, counter_id):
+        user = request.user
+
+        try:
+            counter = ServiceCounter.objects.get(id=counter_id, is_active=True)
+        except ServiceCounter.DoesNotExist:
+            return Response({"error": "Counter not found or inactive"}, status=404)
+
+        if counter.assigned_staff != user:
+            return Response({"error": "You are not assigned to this counter."}, status=403)
+
+        # Current ticket being served or in progress
+        current_ticket = Ticket.objects.filter(
+            counter=counter,
+            status__in=["in_progress", "served"]
+        ).order_by('-called_at').first()
+
+        # Next pending tickets for this counter's allowed services, in same branch
+        allowed_services = counter.allowed_services.all()
+        pending_tickets = Ticket.objects.filter(
+            branch=counter.branch,
+            service__in=allowed_services,
+            status='pending'
+        ).order_by('created_at')[:5]  # limit to next 5
+
+        return Response({
+            "counter_id": counter.id,
+            "staff": user.username,
+            "services": [s.name for s in allowed_services],
+            "current_ticket": {
+                "ticket_number": current_ticket.ticket_number,
+                "status": current_ticket.status,
+                "called_at": current_ticket.called_at,
+                "customer_name": current_ticket.customer_name
+            } if current_ticket else None,
+            "next_pending": [
+                {
+                    "ticket_number": t.ticket_number,
+                    "created_at": t.created_at,
+                    "customer_name": t.customer_name
+                } for t in pending_tickets
+            ]
+        })
