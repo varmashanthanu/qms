@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -14,9 +16,19 @@ class BranchDashboardView(APIView):
         except Branch.DoesNotExist:
             return Response({"error": "Branch not found"}, status=404)
 
+        # 🔍 Parse ?date=YYYY-MM-DD
+        date_str = request.query_params.get("date")
+        try:
+            selected_date = (
+                datetime.strptime(date_str, "%Y-%m-%d").date()
+                if date_str else now().date()
+            )
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+
+        # ────────────── COUNTER DATA ──────────────
         counters_data = []
-        counters = (branch.counters.filter(is_active=True).select_related('assigned_staff')
-                    .prefetch_related('allowed_services'))
+        counters = branch.counters.filter(is_active=True).select_related('assigned_staff')
         for counter in counters:
             current_ticket = Ticket.objects.filter(
                 counter=counter,
@@ -35,24 +47,25 @@ class BranchDashboardView(APIView):
                 } if current_ticket else None
             })
 
-        today = now().date()
+        # ────────────── SERVICE DATA ──────────────
         services_data = []
-        services = Service.objects.all()
+        services = branch.services.all()  # Assuming a reverse FK on Service to Branch
 
         for service in services:
             tickets = Ticket.objects.filter(branch=branch, service=service)
-            tickets_today = tickets.filter(created_at__date=today)
+            tickets_on_date = tickets.filter(created_at__date=selected_date)
 
             services_data.append({
                 "service": service.name,
-                "pending_count": tickets.filter(status="pending").count(),
-                "in_progress_count": tickets.filter(status="in_progress").count(),
-                "served_today": tickets_today.filter(status="served").count(),
+                "pending_count": tickets_on_date.filter(status="pending").count(),
+                "in_progress_count": tickets_on_date.filter(status="in_progress").count(),
+                "served_count": tickets_on_date.filter(status="served").count(),
             })
 
         return Response({
             "branch_id": branch.id,
             "branch_name": branch.name,
+            "date": selected_date,
             "counters": counters_data,
             "services": services_data,
         })

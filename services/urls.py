@@ -31,5 +31,5 @@ urlpatterns = [
     path('dashboard/branch/<int:branch_id>/', BranchDashboardView.as_view(), name='branch-dashboard'),
 
     # Counter Queue URLs
-    path('counters/<int:counter_id>/queue/', CounterQueueView.as_view(), name='counter-queue'),
+    path('counters/<int:pk>/queue/', CounterQueueView.as_view(), name='counter-queue'),
 ]

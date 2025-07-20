@@ -135,30 +135,35 @@ class TicketActionView(APIView):
 class CounterQueueView(APIView):
     permission_classes = [IsAuthenticated, IsStaff]
 
-    def get(self, request, counter_id):
+    def get(self, request, pk):
         user = request.user
 
         try:
-            counter = ServiceCounter.objects.get(id=counter_id, is_active=True)
+            counter = ServiceCounter.objects.get(id=pk, is_active=True)
         except ServiceCounter.DoesNotExist:
             return Response({"error": "Counter not found or inactive"}, status=404)
 
         if counter.assigned_staff != user:
             return Response({"error": "You are not assigned to this counter."}, status=403)
 
-        # Current ticket being served or in progress
+        allowed_services = counter.allowed_services.all()
+
+        limit_param = request.query_params.get("limit", 5)
+        try:
+            limit = min(int(limit_param), 20)
+        except ValueError:
+            return Response({"error": "Invalid limit. Must be an integer."}, status=400)
+
         current_ticket = Ticket.objects.filter(
             counter=counter,
             status__in=["in_progress", "served"]
         ).order_by('-called_at').first()
 
-        # Next pending tickets for this counter's allowed services, in same branch
-        allowed_services = counter.allowed_services.all()
         pending_tickets = Ticket.objects.filter(
             branch=counter.branch,
             service__in=allowed_services,
             status='pending'
-        ).order_by('created_at')[:5]  # limit to next 5
+        ).order_by('created_at')[:limit]
 
         return Response({
             "counter_id": counter.id,
