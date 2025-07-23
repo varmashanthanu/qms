@@ -91,7 +91,7 @@ Health check the API at `http://localhost:8000/api/v1/health`.
 
 ## 📡 API Endpoints
 
-Access the API documentation at `http://localhost:8000/api/v1/docs` (Swagger UI).
+Access the API documentation at `http://localhost:8000/swagger` (Swagger UI) or `http://localhost:8000/redoc` (Redoc UI).
 
 | Method | Endpoint                   | Description                   | Auth Required |
 |--------|----------------------------|-------------------------------|---------------|
