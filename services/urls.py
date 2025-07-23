@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (ServiceListCreateView, ServiceDetailView, CategoryListCreateView, CategoryDetailView,
                     BranchListCreateView, BranchDetailView, ServiceCounterListCreateView, ServiceCounterDetailView,
-                    TicketCreateView, MyTicketsView, TicketActionView)
+                    TicketCreateView, MyTicketsView, TicketActionView, BranchDashboardView, CounterQueueView)
+
+
 
 urlpatterns = [
     # Service URLs
@@ -25,4 +27,9 @@ urlpatterns = [
     path('my-tickets/', MyTicketsView.as_view(), name='my-tickets'),
     path('tickets/<int:pk>/action/', TicketActionView.as_view(), name='ticket-action'),
 
+    # Dashboard URLs
+    path('dashboard/branch/<int:branch_id>/', BranchDashboardView.as_view(), name='branch-dashboard'),
+
+    # Counter Queue URLs
+    path('counters/<int:pk>/queue/', CounterQueueView.as_view(), name='counter-queue'),
 ]

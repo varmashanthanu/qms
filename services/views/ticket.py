@@ -5,67 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Service, Category, Branch, ServiceCounter, Ticket
-from .serializers import (ServiceSerializer, CategorySerializer, BranchSerializer, ServiceCounterSerializer,
-                          TicketSerializer, TicketCreateSerializer)
-from users.permissions import IsAdmin, IsStaff
-
-# TODO change all the hardcoded strings to constants or enums (Status, actions, etc.)
-
-# --- Service Views ---
-class ServiceListCreateView(generics.ListCreateAPIView):
-    queryset = Service.objects.all().order_by('-created_at')
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAdmin]
-
-class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Category Views ---
-class CategoryListCreateView(generics.ListCreateAPIView):
-    queryset = Category.objects.all().order_by('name')
-    serializer_class = CategorySerializer
-    permission_classes = [IsAdmin]
-
-class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Branch Views ---
-class BranchListCreateView(generics.ListCreateAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
-class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- ServiceCounter Views ---
-class ServiceCounterListCreateView(generics.ListCreateAPIView):
-    queryset = ServiceCounter.objects.all()
-    serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
-
-class ServiceCounterDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ServiceCounter.objects.all()
-    serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
-
-
-# --- Ticket Views ---
-class TicketCreateView(generics.CreateAPIView):
-    queryset = Ticket.objects.all()
-    serializer_class = TicketCreateSerializer
-    permission_classes = []  # Public (no auth) — secure behind device-level controls
-
+from services.models import Service, Branch, ServiceCounter, Ticket
+from services.serializers import TicketSerializer
+from users.permissions import IsStaff
 
 # --- Staff Ticket Views ---
 class MyTicketsView(generics.ListAPIView):
@@ -189,3 +131,55 @@ class TicketActionView(APIView):
             return Response({"error": "Invalid action."}, status=400)
 
         return Response(TicketSerializer(ticket).data, status=200)
+
+class CounterQueueView(APIView):
+    permission_classes = [IsAuthenticated, IsStaff]
+
+    def get(self, request, pk):
+        user = request.user
+
+        try:
+            counter = ServiceCounter.objects.get(id=pk, is_active=True)
+        except ServiceCounter.DoesNotExist:
+            return Response({"error": "Counter not found or inactive"}, status=404)
+
+        if counter.assigned_staff != user:
+            return Response({"error": "You are not assigned to this counter."}, status=403)
+
+        allowed_services = counter.allowed_services.all()
+
+        limit_param = request.query_params.get("limit", 5)
+        try:
+            limit = min(int(limit_param), 20)
+        except ValueError:
+            return Response({"error": "Invalid limit. Must be an integer."}, status=400)
+
+        current_ticket = Ticket.objects.filter(
+            counter=counter,
+            status__in=["in_progress", "served"]
+        ).order_by('-called_at').first()
+
+        pending_tickets = Ticket.objects.filter(
+            branch=counter.branch,
+            service__in=allowed_services,
+            status='pending'
+        ).order_by('created_at')[:limit]
+
+        return Response({
+            "counter_id": counter.id,
+            "staff": user.username,
+            "services": [s.name for s in allowed_services],
+            "current_ticket": {
+                "ticket_number": current_ticket.ticket_number,
+                "status": current_ticket.status,
+                "called_at": current_ticket.called_at,
+                "customer_name": current_ticket.customer_name
+            } if current_ticket else None,
+            "next_pending": [
+                {
+                    "ticket_number": t.ticket_number,
+                    "created_at": t.created_at,
+                    "customer_name": t.customer_name
+                } for t in pending_tickets
+            ]
+        })
