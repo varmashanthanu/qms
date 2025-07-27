@@ -42,7 +42,7 @@ class KioskTokenExchangeView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        key = serializer.validated_data['key']
+        key = serializer.validated_data['kiosk_key']
 
         try:
             kiosk_key = KioskKey.objects.get(key=key, used=False)
@@ -59,6 +59,7 @@ class KioskTokenExchangeView(APIView):
             access_token["scope"] = "kiosk"
             access_token["branch_id"] = str(kiosk_key.branch.id)
 
-            return Response({"access_token": str(access_token)}, status=status.HTTP_200_OK)
+            return Response({"access_token": str(access_token), "branch_id": kiosk_key.branch_id},
+                            status=status.HTTP_200_OK)
         except KioskKey.DoesNotExist:
             return Response({"detail": "Kiosk key not found or already used."}, status=status.HTTP_404_NOT_FOUND)

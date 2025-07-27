@@ -5,4 +5,4 @@ class KioskKeyExchangeSerializer(serializers.Serializer):
     """
     Serializer for Kiosk Key Exchange.
     """
-    key = serializers.UUIDField()
+    kiosk_key = serializers.UUIDField()

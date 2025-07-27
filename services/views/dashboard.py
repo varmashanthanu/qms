@@ -49,7 +49,7 @@ class BranchDashboardView(APIView):
 
         # ────────────── SERVICE DATA ──────────────
         services_data = []
-        services = branch.services.all()  # Assuming a reverse FK on Service to Branch
+        services = Service.objects.all()  # TODO: Should services be specific to the branch?
 
         for service in services:
             tickets = Ticket.objects.filter(branch=branch, service=service)
