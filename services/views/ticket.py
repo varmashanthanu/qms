@@ -1,3 +1,5 @@
+import enum
+
 from django.db import models
 from django.utils import timezone
 from rest_framework import generics
@@ -39,6 +41,11 @@ class MyTicketsView(generics.ListAPIView):
 
 class TicketActionView(APIView):
     permission_classes = [IsAuthenticated, IsStaff]
+    class Actions(enum.Enum):
+        CALL = "call"
+        COMPLETE = "complete"
+        SKIP = "skip"
+        TRANSFER = "transfer"
 
     def post(self, request, pk):
         user = request.user
@@ -50,8 +57,8 @@ class TicketActionView(APIView):
             return Response({"error": "Ticket not found"}, status=404)
 
         # --- CALL ---
-        if action == "call":
-            if ticket.status != 'pending' or ticket.assigned_to:
+        if action == self.Actions.CALL.value:
+            if ticket.status != Ticket.Status.PENDING.value or ticket.assigned_to:
                 return Response({"error": "Ticket is not available to be called."}, status=400)
 
             counter = ServiceCounter.objects.filter(assigned_staff=user, is_active=True).first()
@@ -60,49 +67,38 @@ class TicketActionView(APIView):
 
             ticket.assigned_to = user
             ticket.counter = counter
-            ticket.status = 'in_progress'
+            ticket.status = Ticket.Status.IN_PROGRESS.value
             ticket.called_at = timezone.now()
             ticket.save()
 
-        # --- SERVE ---
-        elif action == "serve":
-            if ticket.status != 'in_progress':
-                return Response({"error": "Ticket must be in progress to be served."}, status=400)
-            if ticket.assigned_to != user:
-                return Response({"error": "You are not assigned to this ticket."}, status=403)
-
-            ticket.status = 'served'
-            ticket.served_at = timezone.now()
-            ticket.save()
-
         # --- COMPLETE ---
-        elif action == "complete":
-            if ticket.status != 'served':
-                return Response({"error": "Only served tickets can be completed."}, status=400)
+        elif action == self.Actions.COMPLETE.value:
+            if ticket.status != Ticket.Status.IN_PROGRESS.value:
+                return Response({"error": "Only tickets in progress can be completed."}, status=400)
             if ticket.assigned_to != user:
                 return Response({"error": "You are not assigned to this ticket."}, status=403)
 
-            ticket.status = 'served'  # keep status for historical integrity (or change to 'completed')
+            ticket.status = Ticket.Status.COMPLETED  # keep status for historical integrity (or change to 'completed')
             ticket.completed_at = timezone.now()
             ticket.save()
 
         # --- SKIP ---
-        elif action == "skip":
-            if ticket.status != 'in_progress':
+        elif action == self.Actions.SKIP.value:
+            if ticket.status != Ticket.Status.IN_PROGRESS.value:
                 return Response({"error": "Only in-progress tickets can be skipped."}, status=400)
             if ticket.assigned_to != user:
                 return Response({"error": "You are not assigned to this ticket."}, status=403)
 
             # Requeue ticket
-            ticket.status = 'pending'
+            ticket.status = Ticket.Status.PENDING.value
             ticket.assigned_to = None
             ticket.counter = None
             ticket.called_at = None
             ticket.save()
 
         # --- TRANSFER ---
-        elif action == "transfer":
-            if ticket.status not in ['in_progress', 'served']:
+        elif action == self.Actions.TRANSFER.value:
+            if ticket.status not in [Ticket.Status.IN_PROGRESS.value]:
                 return Response({"error": "Only in-progress tickets can be transferred."}, status=400)
             if ticket.assigned_to != user:
                 return Response({"error": "You are not assigned to this ticket."}, status=403)

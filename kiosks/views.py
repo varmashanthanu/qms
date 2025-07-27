@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from datetime import timedelta
 
 # Create your views here.
 from drf_yasg import openapi
@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
+from kiosks.authentication import KioskCompatibleJWTAuthentication
 from .models import KioskKey
 from .serializers import KioskKeyExchangeSerializer
 
@@ -17,7 +18,7 @@ class KioskTokenExchangeView(APIView):
     """
     View to handle kiosk token exchange.
     """
-    authentication_classes = []  # No auth required
+    authentication_classes = [KioskCompatibleJWTAuthentication]  # No auth required
     permission_classes = [AllowAny]  # Explicitly allow any user
 
     @swagger_auto_schema(
@@ -53,7 +54,8 @@ class KioskTokenExchangeView(APIView):
             kiosk_key.save()
 
             # Generate a new access token for the kiosk
-            access_token = AccessToken()
+            access_token = AccessToken()  # No user, just a kiosk token
+            access_token.set_exp(lifetime=timedelta(days=1))  # Set a 1-day expiration
             access_token["scope"] = "kiosk"
             access_token["branch_id"] = str(kiosk_key.branch.id)
 

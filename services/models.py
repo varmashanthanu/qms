@@ -62,17 +62,18 @@ class ServiceCounter(models.Model):
         return f"{self.branch.name} - {self.name}"
 
 class Ticket(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('in_progress', 'In Progress'),
-        ('served', 'Served'),
-        ('cancelled', 'Cancelled'),
-    ]
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        IN_PROGRESS = 'in_progress', 'In Progress'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+
+    CLOSED_STATUSES = [Status.COMPLETED.value, Status.CANCELLED.value]
 
     ticket_number = models.CharField(max_length=10)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
     assigned_to = models.ForeignKey(
         User,
@@ -104,10 +105,12 @@ class Ticket(models.Model):
             prefix = slugify(self.service.name)[:3].upper()  # e.g. "acc" → "ACC"
             # Count today's tickets for this service
             today = timezone.now().date()
+            # Get today's day as DD format
+            day = today.strftime("%d")
             count_today = Ticket.objects.filter(
                 service=self.service,
                 branch=self.branch,
                 created_at__date=today
             ).count() + 1
-            self.ticket_number = f"{prefix}{count_today:03d}"
+            self.ticket_number = f"{prefix}{day}-{count_today:03d}"
         super().save(*args, **kwargs)
