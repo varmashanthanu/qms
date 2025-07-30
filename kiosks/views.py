@@ -18,7 +18,7 @@ class KioskTokenExchangeView(APIView):
     """
     View to handle kiosk token exchange.
     """
-    authentication_classes = [KioskCompatibleJWTAuthentication]  # No auth required
+    authentication_classes = []  # No auth required
     permission_classes = [AllowAny]  # Explicitly allow any user
 
     @swagger_auto_schema(
