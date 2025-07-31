@@ -23,6 +23,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
 
 class ServiceCounterSerializer(serializers.ModelSerializer):
+    allowed_services = ServiceSerializer(many=True, read_only=True)
     class Meta:
         model = ServiceCounter
         fields = ['id', 'name', 'branch', 'assigned_staff', 'is_active', 'allowed_services']

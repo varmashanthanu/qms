@@ -2,7 +2,8 @@ from rest_framework import generics
 
 from services.models import Service, Category, Branch, ServiceCounter
 from services.serializers import (ServiceSerializer, CategorySerializer, BranchSerializer, ServiceCounterSerializer)
-from users.permissions import IsAdmin
+from users.permissions import IsAdmin, IsStaff
+from rest_framework.permissions import AllowAny
 
 # --- Service Views ---
 class ServiceListCreateView(generics.ListCreateAPIView):
@@ -42,11 +43,21 @@ class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # --- ServiceCounter Views ---
 class ServiceCounterListCreateView(generics.ListCreateAPIView):
-    queryset = ServiceCounter.objects.all()
+    queryset = ServiceCounter.objects.prefetch_related('allowed_services').all()
     serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
+
+    def get_permissions(self):
+        # Allow staff to view details, but only admin can update/delete
+        if self.request.method in ['GET']:
+            return [IsStaff()]
+        return [IsAdmin()]
 
 class ServiceCounterDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ServiceCounter.objects.all()
     serializer_class = ServiceCounterSerializer
-    permission_classes = [IsAdmin]
+
+    def get_permissions(self):
+        # Allow staff to view details, but only admin can update/delete
+        if self.request.method in ['GET']:
+            return [IsStaff()]
+        return [IsAdmin()]
