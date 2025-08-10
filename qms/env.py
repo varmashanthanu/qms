@@ -19,3 +19,7 @@ DB_HOST=os.getenv('DB_HOST')
 DB_PORT=os.getenv('DB_PORT')
 SECRET_KEY=os.getenv('SECRET_KEY', 'something-random')
 DEBUG=os.getenv('DEBUG')
+
+# Services Variables
+REDIS_HOST=os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT=os.getenv('REDIS_PORT', '6379')

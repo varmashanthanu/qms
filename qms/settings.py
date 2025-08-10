@@ -38,13 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 
     'rest_framework',
     'corsheaders',
     'drf_yasg',
 
     'users',
-    'services',
+    'services.apps.ServicesConfig',
     'kiosks',
 
 ]
@@ -163,3 +164,14 @@ SIMPLE_JWT = {
 
 # Additional settings
 AUTH_USER_MODEL = 'users.User'
+
+
+# REDIS CONFIGS TODO: need to update this to use env variables and a redis container
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(env.REDIS_HOST, env.REDIS_PORT)],
+        },
+    },
+}
