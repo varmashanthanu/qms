@@ -1,5 +1,8 @@
 import enum
+import logging
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import models
 from django.utils import timezone
 from rest_framework import generics
@@ -179,3 +182,32 @@ class CounterQueueView(APIView):
                 } for t in pending_tickets
             ]
         })
+
+#### Real-time updates
+def notify_staff_of_new_ticket(ticket: Ticket):
+    """
+    Notify all staff members about a new ticket.
+    This function should be called whenever a new ticket is created.
+    """
+    channel_layer = get_channel_layer()
+    group_name = f'service_{ticket.service.id}'
+
+    logging.info(f"Notifying staff of new ticket: {ticket.id} for service {ticket.service.name}")
+
+    counters = ticket.service.counters.all()
+    for counter in counters:
+        staff_user = counter.assigned_staff
+        if staff_user:
+            async_to_sync(channel_layer.group_send)(
+                group_name,
+                {
+                    "type": "send_new_ticket",
+                    "ticket": {
+                        "id": ticket.id,
+                        "number": ticket.ticket_number,
+                        "service": ticket.service.name,
+                        "created_at": str(ticket.created_at),
+                        # include anything needed by frontend
+                    }
+                }
+            )

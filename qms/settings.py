@@ -32,22 +32,27 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 
     'rest_framework',
     'corsheaders',
     'drf_yasg',
 
     'users',
-    'services',
+    'services.apps.ServicesConfig',
     'kiosks',
 
 ]
+
+ASGI_APPLICATION = "qms.asgi.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -163,3 +168,14 @@ SIMPLE_JWT = {
 
 # Additional settings
 AUTH_USER_MODEL = 'users.User'
+
+
+# REDIS CONFIGS
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(env.REDIS_HOST, env.REDIS_PORT)],
+        },
+    },
+}
