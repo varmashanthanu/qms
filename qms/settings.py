@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
     'kiosks',
 
 ]
+
+ASGI_APPLICATION = "qms.asgi.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -166,7 +170,7 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.User'
 
 
-# REDIS CONFIGS TODO: need to update this to use env variables and a redis container
+# REDIS CONFIGS
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',

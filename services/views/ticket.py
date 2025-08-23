@@ -1,4 +1,5 @@
 import enum
+import logging
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -183,26 +184,27 @@ class CounterQueueView(APIView):
         })
 
 #### Real-time updates
-def notify_staff_of_new_ticket(ticket):
+def notify_staff_of_new_ticket(ticket: Ticket):
     """
     Notify all staff members about a new ticket.
     This function should be called whenever a new ticket is created.
     """
     channel_layer = get_channel_layer()
-    group_name = f'staff_{ticket.assigned_to.id}' if ticket.assigned_to else 'staff_general'
+    group_name = f'service_{ticket.service.id}'
 
-    counters = ticket.service.allowed_services.all()
+    logging.info(f"Notifying staff of new ticket: {ticket.id} for service {ticket.service.name}")
+
+    counters = ticket.service.counters.all()
     for counter in counters:
         staff_user = counter.assigned_staff
         if staff_user:
-            group_name = f'staff_{staff_user.id}'
             async_to_sync(channel_layer.group_send)(
                 group_name,
                 {
                     "type": "send_new_ticket",
                     "ticket": {
                         "id": ticket.id,
-                        "number": ticket.number,
+                        "number": ticket.ticket_number,
                         "service": ticket.service.name,
                         "created_at": str(ticket.created_at),
                         # include anything needed by frontend
