@@ -1,7 +1,8 @@
 """ This is a dev script to set up the initial database state for development purposes. """
 
 from dev_tools.data_factory import user_factory, branch_factory, category_factory, service_factory
-from services.models import Branch, ServiceCounter
+from organization.models import Branch
+from services.models import ServiceCounter
 
 
 def create_initial_users():

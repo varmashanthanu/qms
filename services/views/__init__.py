@@ -1,8 +1,7 @@
 from .admin import (ServiceListCreateView, ServiceDetailView,
                     CategoryListCreateView, CategoryDetailView,
-                    BranchListCreateView, BranchDetailView,
                     ServiceCounterListCreateView, ServiceCounterDetailView)
-from .dashboard import BranchDashboardView
+from organization.views import BranchListCreateView, BranchDetailView
 from .kiosk import TicketCreateView
 from .ticket import MyTicketsView, TicketActionView, CounterQueueView
 

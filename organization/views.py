@@ -1,11 +1,28 @@
 from datetime import datetime
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from users.permissions import IsAdmin
 from django.utils.timezone import now
-from services.models import Branch, Service, Ticket
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from organization.models import Branch
+from organization.serializers import BranchSerializer
+from services.models import Ticket, Service
+from users.permissions import IsAdmin
+
+
+class BranchListCreateView(generics.ListCreateAPIView):
+    queryset = Branch.objects.all()
+    serializer_class = BranchSerializer
+    permission_classes = [IsAdmin]
+
+
+class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Branch.objects.all()
+    serializer_class = BranchSerializer
+    permission_classes = [IsAdmin]
+
 
 class BranchDashboardView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
@@ -28,7 +45,8 @@ class BranchDashboardView(APIView):
 
         # ────────────── COUNTER DATA ──────────────
         counters_data = []
-        counters = branch.counters.filter(is_active=True).select_related('assigned_staff')
+        counters = (branch.counters.filter(is_active=True).select_related('assigned_staff')
+                    .prefetch_related('allowed_services')).all()
         for counter in counters:
             current_ticket = Ticket.objects.filter(
                 counter=counter,
@@ -49,7 +67,10 @@ class BranchDashboardView(APIView):
 
         # ────────────── SERVICE DATA ──────────────
         services_data = []
-        services = Service.objects.all()  # TODO: Should services be specific to the branch?
+        services = []
+        for counter in counters:
+            services.extend(counter.allowed_services.all())
+
 
         for service in services:
             tickets = Ticket.objects.filter(branch=branch, service=service)

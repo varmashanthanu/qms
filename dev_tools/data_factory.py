@@ -1,7 +1,9 @@
 """ Data factory for creating instances of models in the application. """
 
 from users.models import User
-from services.models import Branch, Category, Service
+from organization.models import Branch
+from services.models import Category, Service
+
 
 def user_factory(username, email, password):
     return User(username=username, email=email, password=password)

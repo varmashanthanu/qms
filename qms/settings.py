@@ -46,9 +46,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
 
-    'users',
-    'services.apps.ServicesConfig',
     'kiosks',
+    'organization',
+    'services.apps.ServicesConfig',
+    'users',
 
 ]
 

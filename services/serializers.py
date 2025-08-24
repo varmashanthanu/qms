@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Service, Category, Branch, ServiceCounter, Ticket
+from .models import Service, Category, ServiceCounter, Ticket
+from organization.models import Branch
+
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,13 +15,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'description', 'is_active', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Branch
-        fields = ['id', 'name', 'address', 'is_active', 'created_at']
-        read_only_fields = ['id', 'created_at']
 
 
 class ServiceCounterSerializer(serializers.ModelSerializer):
@@ -52,8 +47,8 @@ class TicketCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'ticket_number', 'status', 'created_at']
 
     def validate(self, data):
-        service = data.get('service')
-        branch = data.get('branch')
+        service: Service = data.get('service')
+        branch: Branch = data.get('branch')
 
         if not service.is_active:
             raise serializers.ValidationError("Selected service is not active.")

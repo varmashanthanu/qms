@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Service, Category, Branch, ServiceCounter, Ticket
+from .models import Service, Category, ServiceCounter, Ticket
+
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
@@ -9,12 +10,6 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active', 'created_at']
-    search_fields = ['name']
-    list_filter = ['is_active']
-
-@admin.register(Branch)
-class BranchAdmin(admin.ModelAdmin):
     list_display = ['name', 'is_active', 'created_at']
     search_fields = ['name']
     list_filter = ['is_active']

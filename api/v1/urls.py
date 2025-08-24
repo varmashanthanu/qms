@@ -4,4 +4,5 @@ urlpatterns = [
     path('auth/', include('users.urls')),
     path('services/', include('services.urls')),
     path('kiosks/', include('kiosks.urls')),
+    path('organization/', include('organization.urls')),
 ]

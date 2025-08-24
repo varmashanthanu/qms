@@ -1,9 +1,9 @@
 from rest_framework import generics
 
-from services.models import Service, Category, Branch, ServiceCounter
-from services.serializers import (ServiceSerializer, CategorySerializer, BranchSerializer, ServiceCounterSerializer)
+from services.models import Service, Category, ServiceCounter
+from services.serializers import (ServiceSerializer, CategorySerializer, ServiceCounterSerializer)
 from users.permissions import IsAdmin, IsStaff
-from rest_framework.permissions import AllowAny
+
 
 # --- Service Views ---
 class ServiceListCreateView(generics.ListCreateAPIView):
@@ -16,7 +16,6 @@ class ServiceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ServiceSerializer
     permission_classes = [IsAdmin]
 
-
 # --- Category Views ---
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all().order_by('name')
@@ -27,19 +26,6 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAdmin]
-
-
-# --- Branch Views ---
-class BranchListCreateView(generics.ListCreateAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
-class BranchDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Branch.objects.all()
-    serializer_class = BranchSerializer
-    permission_classes = [IsAdmin]
-
 
 # --- ServiceCounter Views ---
 class ServiceCounterListCreateView(generics.ListCreateAPIView):

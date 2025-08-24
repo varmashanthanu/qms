@@ -14,7 +14,7 @@ class User(AbstractUser):
 
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     branch = models.ForeignKey(
-        'services.Branch',
+        'organization.Branch',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

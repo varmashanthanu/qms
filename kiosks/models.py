@@ -6,7 +6,8 @@ from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
-from services.models import Branch
+from organization.models import Branch
+
 
 class KioskKey(models.Model):
     """

@@ -21,3 +21,24 @@ def run_initial_setup():
     create_initial_categories_and_services()
     create_initial_service_counters()
     print("Initial setup completed successfully.")
+
+def reset_database():
+    """
+    Reset the database to a clean state.
+    WARNING: This will delete all data in the database.
+    """
+    from django.core.management import call_command
+    call_command('flush', '--noinput')
+    print("Database reset completed successfully.")
+
+def create_super_user(username: str = 'qms_root', email: str = 'root@qms.com', password: str = 'qms_root'):
+    """
+    Create a superuser for admin access.
+    """
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        print(f"Superuser '{username}' created successfully.")
+    else:
+        print(f"Superuser '{username}' already exists.")

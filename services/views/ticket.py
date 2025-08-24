@@ -10,7 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from services.models import Service, Branch, ServiceCounter, Ticket
+from services.models import Service, ServiceCounter, Ticket
+from organization.models import Branch
 from services.serializers import TicketSerializer
 from users.permissions import IsStaff
 
